@@ -1,8 +1,10 @@
 package ca.ualberta.cs.lonelytwitter;
 
+import java.util.Observable;
+
 /**
- * Created by wsong1 on 2015/10/5 0005.
+ * Created by romansky on 10/7/15.
  */
 public interface MyObserver {
-    void myNotify(MyObservable observable);
+    void myNotify();
 }

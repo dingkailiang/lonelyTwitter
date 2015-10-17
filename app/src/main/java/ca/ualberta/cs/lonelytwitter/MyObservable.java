@@ -1,8 +1,11 @@
 package ca.ualberta.cs.lonelytwitter;
 
+import java.util.ArrayList;
+
 /**
- * Created by wsong1 on 2015/10/5 0005.
+ * Created by romansky on 10/7/15.
  */
 public interface MyObservable {
-    void addObserver(MyObserver observer);
+    void addObserver(MyObserver o);
+    void notifyObservers();
 }

@@ -1,6 +1,7 @@
 package ca.ualberta.cs.lonelytwitter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -14,8 +15,10 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,34 +26,63 @@ import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-public class LonelyTwitterActivity extends Activity implements MyObserver {
 
-	private static final String FILENAME = "file.sav"; // Model
-	private EditText bodyText; // View
-	private ListView oldTweetsList; // View
-	private ArrayList<Tweet> tweets; // Controller
-	private ArrayAdapter<Tweet> adapter; // Controller
+public class LonelyTwitterActivity extends Activity {
+
+	private static final String FILENAME = "file.sav"; // model
+
+	private LonelyTwitterActivity activity = this;
+	private EditText bodyText;
+	private ArrayList<Tweet> tweets = new ArrayList<Tweet>();
+	private ListView oldTweetsList;
+	private ArrayAdapter<Tweet> adapter;
+	private Button saveButton;
 
 
+	public ListView getOldTweetsList() {
+		return oldTweetsList;
+	}
 
+	public ArrayList<Tweet> getTweets() {
+		return tweets;
+	}
+
+	public Button getSaveButton() {
+		return saveButton;
+	}
+
+	public EditText getBodyText() {
+		return bodyText;
+	}
+
+	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		bodyText = (EditText) findViewById(R.id.body);//View
-		Button saveButton = (Button) findViewById(R.id.save);//View
-		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);//View
+		bodyText = (EditText) findViewById(R.id.body);
+		saveButton = (Button) findViewById(R.id.save);
+		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
+
+		oldTweetsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				Temp.getInstance().setTweet(tweets.get(position));
+				Intent intent = new Intent(activity, EditTweetActivity.class);
+				startActivity(intent);
+			}
+		});
 
 		saveButton.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
 				setResult(RESULT_OK);
-				String text = bodyText.getText().toString(); // Controller
-				tweets.add(new NormalTweet(text)); // Controller
-				saveInFile(); // Model
-				adapter.notifyDataSetChanged(); // Controller
+				String text = bodyText.getText().toString();
+				tweets.add(new NormalTweet(text));
+				saveInFile(); // model
+				// dataObject.saveInFile() //controller
+				adapter.notifyDataSetChanged(); // view
 			}
 		});
 	}
@@ -59,23 +91,21 @@ public class LonelyTwitterActivity extends Activity implements MyObserver {
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
-		loadFromFile();  // Model
-		if (tweets == null) {
-			throw new RuntimeException();
-		}
-		adapter = new ArrayAdapter<Tweet>(this, R.layout.list_item, tweets); // Controller
-		oldTweetsList.setAdapter(adapter); // View
+		loadFromFile();
+		adapter = new ArrayAdapter<Tweet>(this,
+				R.layout.list_item, tweets);
+		oldTweetsList.setAdapter(adapter);
+		adapter.notifyDataSetChanged();
 	}
 
-	// Model
 	private void loadFromFile() {
 		try {
 			FileInputStream fis = openFileInput(FILENAME);
 			BufferedReader in = new BufferedReader(new InputStreamReader(fis));
 			Gson gson = new Gson();
-			// Following line based on https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/com/google/gson/Gson.html retrieved 2015-09-21
-			Type listType = new TypeToken<ArrayList<NormalTweet>>() {}.getType();
-			tweets = gson.fromJson(in, listType);
+			// https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/com/google/gson/Gson.html, 2015-09-23
+			Type arraylistType = new TypeToken<ArrayList<NormalTweet>>() {}.getType();
+			tweets = gson.fromJson(in, arraylistType);
 
 		} catch (FileNotFoundException e) {
 			tweets = new ArrayList<Tweet>();
@@ -83,25 +113,21 @@ public class LonelyTwitterActivity extends Activity implements MyObserver {
 			throw new RuntimeException(e);
 		}
 	}
-
-	// Model
+	
 	private void saveInFile() {
 		try {
-			FileOutputStream fos = openFileOutput(FILENAME,
-					0);
-			OutputStreamWriter writer = new OutputStreamWriter(fos);
+			FileOutputStream fos = openFileOutput(FILENAME, 0);
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(fos));
 			Gson gson = new Gson();
-			gson.toJson(tweets, writer);
-			writer.flush();
+			gson.toJson(tweets, out);
+			out.flush();
 			fos.close();
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
 			throw new RuntimeException(e);
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			throw new RuntimeException(e);
 		}
-	}
-
-	public void myNotify(MyObservable observable) {
-		adapter.notifyDataSetChanged();
 	}
 }
