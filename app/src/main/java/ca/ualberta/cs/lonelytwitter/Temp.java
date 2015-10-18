@@ -6,8 +6,22 @@ package ca.ualberta.cs.lonelytwitter;
 public class Temp {
     private Tweet tweet;
     private static Temp instance;
+    private int position;
 
-    private Temp() {
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    private Temp() {}
+
+    public static boolean hasTemp(){ return instance != null;}
+
+    public static void destroy(){
+        instance = null;
     }
 
     public static Temp getInstance() {
@@ -15,9 +29,7 @@ public class Temp {
         return instance;
     }
 
-    public Tweet getTweet() {
-        return tweet;
-    }
+    public Tweet getTweet() { return tweet; }
 
     public void setTweet(Tweet tweet) {
         this.tweet = tweet;

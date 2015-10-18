@@ -1,25 +1,32 @@
 package ca.ualberta.cs.lonelytwitter;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class EditTweetActivity extends Activity {
     private Tweet tweet;
     private Button saveButton;
-    private TextView bodytext;
+    private EditText bodyText;
+    private EditTweetActivity activity = this;
 
 
     public Tweet getTweet() {
         return tweet;
     }
 
-    public TextView getBodytext() {
-        return bodytext;
+    public EditText getBodyText() {
+        return bodyText;
+    }
+
+    public Button getSaveButton() {
+        return saveButton;
     }
 
     @Override
@@ -28,8 +35,16 @@ public class EditTweetActivity extends Activity {
         setContentView(R.layout.activity_edit_tweet);
         tweet = Temp.getInstance().getTweet();
         saveButton = (Button) findViewById(R.id.editSave);
-        bodytext = (TextView) findViewById(R.id.editTweet);
-        bodytext.setText(tweet.getText());
+        bodyText = (EditText) findViewById(R.id.bodyText);
+        bodyText.setText(tweet.getText());
+        saveButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                tweet = new NormalTweet(bodyText.getText().toString());
+                Temp.getInstance().setTweet(tweet);
+                activity.finish();
+            }
+        });
     }
 
     @Override

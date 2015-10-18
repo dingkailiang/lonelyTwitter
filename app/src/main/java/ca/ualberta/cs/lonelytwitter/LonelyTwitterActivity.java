@@ -37,6 +37,7 @@ public class LonelyTwitterActivity extends Activity {
 	private ListView oldTweetsList;
 	private ArrayAdapter<Tweet> adapter;
 	private Button saveButton;
+	private Button clearButton;
 
 
 	public ListView getOldTweetsList() {
@@ -64,11 +65,13 @@ public class LonelyTwitterActivity extends Activity {
 
 		bodyText = (EditText) findViewById(R.id.body);
 		saveButton = (Button) findViewById(R.id.save);
+		clearButton = (Button) findViewById(R.id.clear);
 		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
 
 		oldTweetsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				Temp.getInstance().setTweet(tweets.get(position));
+				Temp.getInstance().setPosition(position);
 				Intent intent = new Intent(activity, EditTweetActivity.class);
 				startActivity(intent);
 			}
@@ -79,7 +82,18 @@ public class LonelyTwitterActivity extends Activity {
 			public void onClick(View v) {
 				setResult(RESULT_OK);
 				String text = bodyText.getText().toString();
+				bodyText.setText(null);
 				tweets.add(new NormalTweet(text));
+				saveInFile(); // model
+				// dataObject.saveInFile() //controller
+				adapter.notifyDataSetChanged(); // view
+			}
+		});
+
+		clearButton.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				tweets.clear();
 				saveInFile(); // model
 				// dataObject.saveInFile() //controller
 				adapter.notifyDataSetChanged(); // view
@@ -91,6 +105,11 @@ public class LonelyTwitterActivity extends Activity {
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
+		if (Temp.hasTemp()){
+			tweets.set(Temp.getInstance().getPosition(),Temp.getInstance().getTweet());
+			Temp.destroy();
+			saveInFile();
+		}
 		loadFromFile();
 		adapter = new ArrayAdapter<Tweet>(this,
 				R.layout.list_item, tweets);
