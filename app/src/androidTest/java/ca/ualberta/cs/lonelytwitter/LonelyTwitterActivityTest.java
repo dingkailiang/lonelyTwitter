@@ -109,12 +109,12 @@ public class LonelyTwitterActivityTest extends ActivityInstrumentationTestCase2 
 
 
         // test that the modified tweet was saved
-        activity = (LonelyTwitterActivity)
+        LonelyTwitterActivity newactivity= (LonelyTwitterActivity)
                 activityMonitor.waitForActivityWithTimeout(1000);
-        assertTrue(activity.getTweets().get(0).getText().equals(tweetText));
+        assertTrue(newactivity.getTweets().get(0).getText().equals(tweetText));
 
         // test that the modified tweet is in the tweet list
-        assertEquals(((Tweet) oldTweetsList.getItemAtPosition(0)).getText(), tweetText);
+        assertEquals(((Tweet) newactivity.getOldTweetsList().getItemAtPosition(0)).getText(), tweetText);
 
         getInstrumentation().removeMonitor(activityMonitor);
         receiverActivity.finish(); // close activity test is good!
