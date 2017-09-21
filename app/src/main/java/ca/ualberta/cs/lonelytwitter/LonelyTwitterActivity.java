@@ -50,7 +50,7 @@ public class LonelyTwitterActivity extends Activity {
 				setResult(RESULT_OK);
 				String text = bodyText.getText().toString();
 
-				tweets.add(new NormalTweet(text));
+				tweets.clear();
 				adapter.notifyDataSetChanged();
 				saveInFile();
 			}
